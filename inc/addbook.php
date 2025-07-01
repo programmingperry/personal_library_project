@@ -61,7 +61,12 @@
 
     <div class="mb-3">
       <label for="format" class="form-label">Format</label>
-      <select id="format" name="formats[]" multiple class="form-select"></select>
+      <select id="format" name="format" class="form-select"></select>
+    </div>
+
+    <div class="mb-3">
+      <label for="language" class="form-label">Language</label>
+      <select id="language" name="language" class="form-select"></select>
     </div>
 
     <div class="mb-3">
@@ -120,7 +125,7 @@
 <script>
   // Daten initial füllen
   const genresOptions = [
-    'Fantasy', 'Science Fiction', 'Romance', 'Thriller'
+    'Fantasy', 'Young Adult', 'Psychology', 'LGBTQIA+', 'Feminism', 'Gender', 'Self Help', 'Science', 'Sociology', 'Mystery', 'Essays', '', 'Science Fiction', 'Romance', 'Thriller'
   ];
 
   const formatOptions = [
@@ -128,11 +133,15 @@
   ];
 
   const tagsOptions = [
-    'Favorite', 'To Read', 'Recommended', 'New Arrival', 'Classic', 'Award Winner',
+    'Favourite', 'Recommended', 'New Arrival', 'Award Winner',
     'Short Reads', 'Long Reads', 'Series', 'Standalone'
   ];
+  
+  const languageOptions = [
+    'Deutsch', 'English'
+  ];
 
-  // Choices Instanzen
+  // Choices für Genres (multiple)
   const genresSelect = new Choices('#genres', {
     removeItemButton: true,
     placeholderValue: 'Select or add new genres',
@@ -140,17 +149,29 @@
     choices: genresOptions.map(g => ({ value: g, label: g }))
   });
 
+  // Choices für Format (single select + add new)
   const formatSelect = new Choices('#format', {
     removeItemButton: true,
-    placeholderValue: 'Select or add new formats',
+    placeholderValue: 'Select or add format',
     addItems: true,
+    maxItemCount: 1,       // Nur eine Auswahl erlaubt
     choices: formatOptions.map(f => ({ value: f, label: f }))
   });
 
+  // Choices für Tags (multiple)
   const tagsSelect = new Choices('#tags', {
     removeItemButton: true,
     placeholderValue: 'Select or add new tags',
     addItems: true,
     choices: tagsOptions.map(t => ({ value: t, label: t }))
+  });
+
+  // Choices für Language (single select + add new)
+  const languageSelect = new Choices('#language', {
+    removeItemButton: true,
+    placeholderValue: 'Select or add language',
+    addItems: true,
+    maxItemCount: 1,        // Nur eine Sprache möglich
+    choices: languageOptions.map(l => ({ value: l, label: l }))
   });
 </script>
