@@ -7,4 +7,4 @@ started: 01/07/25
 # To Do 
 - [ ] PHP Funktionen überlegen  
 - [ ] DB Connection PHP herstellen
-- [ ] javascrip in add book form mit db abfrage kombinieren (bei mehrfachauswahl genre, tags, format) 
+- [ ] javascrip in add book form mit db abfrage kombinieren (bei mehrfachauswahl genre, tags, format)
