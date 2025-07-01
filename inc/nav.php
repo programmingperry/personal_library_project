@@ -1,12 +1,26 @@
-<nav class="navbar bg-body-tertiary">
-  <form class="container-fluid justify-content-start">
-    <button class="btn btn-sm btn-outline-secondary" type="button">My Books</button>
-    <button class="btn btn-sm btn-outline-secondary" type="button">Add</button>
-    <div class="container-fluid">
-    <form class="d-flex" role="search">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-      <button class="btn btn-outline-success" type="submit">Search</button>
-    </form>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">The Book Nook</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Books</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Add</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">TBR</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Stats</a>
+        </li>
+      </ul>
+    </div>
   </div>
-  </form>
 </nav>
