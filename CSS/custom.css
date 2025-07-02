@@ -110,11 +110,13 @@ body.dark-academia {
   font-style: normal;
   color: var(--bs-body-color);
 }
-.dark-academia h1, h2, h3, h4, h5, h6,{
+
+.dark-academia h1, h2, h3, h4, h5, h6 {
 font-family: "Overlock", sans-serif;
   font-weight: 700;
   font-style: normal;
 }
+
 .dark-academia input[type="checkbox"],
 .dark-academia input[type="radio"] {
   accent-color: #6B4C3B;
@@ -184,4 +186,16 @@ font-family: "Overlock", sans-serif;
   background-color: #3B352E !important;
   color: #D8CAB8 !important;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}
+
+
+.bookshelf {
+  max-width: 100%;        /* volle Breite des Viewports */
+  height: auto;        /* Höhe proportional anpassen */
+  display: block;      /* verhindert kleinen Abstand unter dem Bild */
+  opacity: 0.6;        /* Deckkraft auf 70%, kann beliebig angepasst werden */
+  object-fit: cover;   /* optional, falls du willst, dass das Bild skaliert und beschnitten wird */
+  filter: brightness(75%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+  
 }

@@ -8,6 +8,9 @@ $conn = dbConnect();
 ?>
 
 <body class="dark-academia">
+  <div >
+    <img class="bookshelf" src="./assets/bookshelf2.png">
+  </div>
   <div class="container mt-4">
     <div id="content">
     </div>

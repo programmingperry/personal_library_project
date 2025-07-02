@@ -196,4 +196,33 @@ INSERT INTO tag (tagTitle) VALUES
 ('Standalone');
 
 
-```
+````
+
+## Datenbank Constraints
+````
+ALTER TABLE books_authors
+DROP FOREIGN KEY books_authors_ibfk_1;
+
+ALTER TABLE books_authors
+ADD CONSTRAINT books_authors_ibfk_1
+FOREIGN KEY (bID) REFERENCES book(bID)
+ON DELETE CASCADE;
+
+
+ALTER TABLE books_genres
+DROP FOREIGN KEY books_genres_ibfk_1;
+
+ALTER TABLE books_genres
+ADD CONSTRAINT books_genres_ibfk_1
+FOREIGN KEY (bID) REFERENCES book(bID)
+ON DELETE CASCADE;
+
+
+ALTER TABLE books_tags
+DROP FOREIGN KEY books_tags_ibfk_1;
+
+ALTER TABLE books_tags
+ADD CONSTRAINT books_tags_ibfk_1
+FOREIGN KEY (bID) REFERENCES book(bID)
+ON DELETE CASCADE;
+
