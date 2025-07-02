@@ -126,55 +126,71 @@ $pageTitle = "Add a new Book"
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <script>
-  // Daten initial füllen
-  const genresOptions = [
-    'Fantasy', 'Young Adult', 'Psychology', 'LGBTQIA+', 'Feminism', 'Gender', 'Self Help', 'Science', 'Sociology', 'Mystery', 'Essays', '', 'Science Fiction', 'Romance', 'Thriller'
-  ];
+  // Genres
+  fetch('../Classes_Functions/loadselection.php?table=genre&column=genreTitle')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Genres:', data); 
+      new Choices('#genres', {
+        removeItemButton: true,
+        placeholderValue: 'Select or add genres',
+        addItems: true,
+        choices: data.map(item => ({
+          value: item.genreTitle,
+          label: item.genreTitle
+        }))
+      });
+    })
+    .catch(err => console.error('Error loading genres:', err));
 
-  const formatOptions = [
-    'Paperback', 'Hardcover', 'E-Book', 'Audiobook'
-  ];
+  // Formats
+  fetch('../Classes_Functions/loadselection.php?table=format&column=formatName')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Format:', data); 
+      new Choices('#format', {
+        removeItemButton: true,
+        placeholderValue: 'Select or add format',
+        addItems: true,
+        choices: data.map(item => ({
+          value: item.formatName,
+          label: item.formatName
+        }))
+      });
+    })
+    .catch(err => console.error('Error loading formats:', err));
 
-  const tagsOptions = [
-    'Favourite', 'Recommended', 'New Arrival', 'Award Winner',
-    'Short Reads', 'Long Reads', 'Series', 'Standalone'
-  ];
-  
-  const languageOptions = [
-    'Deutsch', 'English'
-  ];
+  //  Tags
+    fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Tags:', data); 
+        new Choices('#tags', {
+          removeItemButton: true,
+          placeholderValue: 'Select or add tags',
+          addItems: true,
+          choices: data.map(item => ({
+            value: item.tagTitle,
+            label: item.tagTitle
+          }))
+        });
+      })
+      .catch(err => console.error('Error loading tags:', err));
 
-  // Choices für Genres (multiple)
-  const genresSelect = new Choices('#genres', {
-    removeItemButton: true,
-    placeholderValue: 'Select or add new genres',
-    addItems: true,
-    choices: genresOptions.map(g => ({ value: g, label: g }))
-  });
+  // Language
+      fetch('../Classes_Functions/loadselection.php?table=book&column=language')
+        .then(data => {
+          console.log('Language:', data); 
+          new Choices('#language', {
+            removeItemButton: true,
+            placeholderValue: 'Select or add language',
+            addItems: true,
+            choices: data.map(item => ({
+              value: item.language,
+              label: item.language
+          }))
+        });
+      })
+        .catch(err => console.error('Error loading languages:', err));
 
-  // Choices für Format (single select + add new)
-  const formatSelect = new Choices('#format', {
-    removeItemButton: true,
-    placeholderValue: 'Select or add format',
-    addItems: true,
-    maxItemCount: 1,       // Nur eine Auswahl erlaubt
-    choices: formatOptions.map(f => ({ value: f, label: f }))
-  });
-
-  // Choices für Tags (multiple)
-  const tagsSelect = new Choices('#tags', {
-    removeItemButton: true,
-    placeholderValue: 'Select or add new tags',
-    addItems: true,
-    choices: tagsOptions.map(t => ({ value: t, label: t }))
-  });
-
-  // Choices für Language (single select + add new)
-  const languageSelect = new Choices('#language', {
-    removeItemButton: true,
-    placeholderValue: 'Select or add language',
-    addItems: true,
-    maxItemCount: 1,        // Nur eine Sprache möglich
-    choices: languageOptions.map(l => ({ value: l, label: l }))
-  });
 </script>
