@@ -6,10 +6,9 @@ function dbConnect() {
     $password = "";
 
     try {
-    $conn = new PDO("mysql:host=$servername;dbname=booknook", $username, $password);
+    $PDO = new PDO("mysql:host=$servername;dbname=booknook", $username, $password);
     // set the PDO error mode to exception
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "<h1 class="welcome">" . "Welcome to your Library" . "</h1>";
+    $PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     return $PDO;
     } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
@@ -18,13 +17,13 @@ function dbConnect() {
 
 }
 
-function loadSelection($table, $column) {
+function loadSelection($PDO, $table, $column) {
     $allowedTables = ['genre', 'tag', 'format'];
     $allowedColumns = ['genreTitle', 'tagTitle', 'formatName'];
 
     if (in_array($table, $allowedTables) && in_array($column, $allowedColumns)) {
         header ('Content-type: application/json');
-        $sql = "SELECT $column FROM $table ORDER BY $column";
+        $sql = "SELECT $column FROM $table ORDER BY $column ASC";
         $stmt = $PDO->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
