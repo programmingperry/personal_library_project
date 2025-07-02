@@ -103,7 +103,7 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="container my-5" style="max-width: 600px;">
   <h1 class="mb-4 text-center">Add a new book</h1>
 
-  <form method="POST">
+  <form method="POST" class="dark-academia" >
 
     <div class="mb-3">
       <label for="bookTitle" class="form-label">Book title</label>

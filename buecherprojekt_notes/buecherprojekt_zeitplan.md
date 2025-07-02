@@ -19,8 +19,24 @@ started: 30/06/25
 | Fr 11.07. |                                                                                                 |         |
 
 ## Gemacht
-- 30.06.: Zeitplan erstellt, Cosing Entscheidungen getroffen, DB Entwurf erstellt, Projektstruktur und Seitenaufbau aufgelistet, erste Design Überlegungen, GitRepo angelegt
-- 01.07.: Datenbank eingerichtet, Daten befüllen erst später (erst die Buch einfügen Funktionalität erstellen), Files und Ordner in VSC erstellt, Buch hinzufügen Formular erstellt, Navigation Struktur erstellt  
+30.06.: 
+- Zeitplan erstellt
+- Coding Entscheidungen getroffen
+- DB Entwurf erstellt
+- Projektstruktur und Seitenaufbau aufgelistet
+- erste Design Überlegungen
+- GithubRepo angelegt
+01.07.:
+- Datenbank eingerichtet
+- Daten befüllen erst später (erst die Buch einfügen Funktionalität erstellen)
+- Files und Ordner in VSC erstellt, Buch hinzufügen Formular erstellt
+- Navigation Struktur erstellt
+02.07.:
+- Datenbankverbindung hergestellt (wuupwuup!)
+- auslesen der Auswahlmöglichkeiten für das Add Book Formular aus Datenbank mit AJAX und Json
+- Datenübertragung aus Formular in addbook.php in Datenbank
+- Menüfunktion und Seitenladen durch JS 
+- CSS Farbanpassungen
 
 
 # Coding Entscheidungen
