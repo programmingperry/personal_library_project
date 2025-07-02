@@ -1,6 +1,8 @@
 <?php 
 require_once "./inc/head.php";
 require_once "./inc/nav.php";
-?>
+require_once "./Classes_Functions/DB.php";
 
-<h1>Hallo Welt!</h1>
+$conn = dbConnect(); 
+
+?>
