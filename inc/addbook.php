@@ -1,6 +1,103 @@
 <?php 
-$pageTitle = "Add a new Book"
+require_once "../Classes_Functions/DB.php";
+$pdo = dbConnect();
+$pageTitle = "Add a new Book";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  
+
+  $nullableFields = ['publishingYear', 'dateStarted', 'dateFinished', 'pages', 'hours', 'minutes', 'rating', 'lID'];
+  $_POST = normalizeInput($_POST, $nullableFields);
+
+  // Get POST-Values
+  $bookTitle = $_POST['bookTitle'] ?? '';
+  $authorName = $_POST['author'] ?? '';
+  $authorID = getOrCreateId($pdo, 'author', 'authorName', $authorName);
+  $publishingYear = $_POST['publishingYear'] ?? null;
+  $dateStarted = $_POST['dateStarted'] ?? null;
+  $dateFinished = $_POST['dateFinished'] ?? null;
+  $pages = $_POST['pages'] ?? null;
+  $hours = $_POST['hours'] ?? 0;
+  $minutes = $_POST['minutes'] ?? 0;
+  $nonFiction = $_POST['nonFiction'] ?? 'Fiction';
+  $formatName = $_POST['format'] ?? '';
+  $fID = getOrCreateId($pdo, 'format', 'formatName', $formatName);
+  $image = $_POST['image'] ?? '';
+  $rating = $_POST['rating'] ?? null;
+  $review = $_POST['review'] ?? '';
+  $owned = isset($_POST['owned']) ? 1 : 0;
+  $dnf = isset($_POST['dnf']) ? 1 : 0;
+
+  $lID_or_name = $_POST['lID'] ?? null;
+  if ($lID_or_name === null || $lID_or_name === '') {
+      $lID = null;
+  } elseif (is_numeric($lID_or_name)) {
+      $lID = (int)$lID_or_name; 
+  } else {
+      
+  }
+
+
+
+  // 2. Add new book into book table
+  $sql = "INSERT INTO book 
+    (bookTitle, publishingYear, dateStarted, dateFinished, pages, hours, minutes, nonFiction, image, rating, review, owned, dnf, fID, lID)
+    VALUES 
+    (:bookTitle, :publishingYear, :dateStarted, :dateFinished, :pages, :hours, :minutes, :nonFiction, :image, :rating, :review, :owned, :dnf, :fID, :lID)";
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    ':bookTitle' => $bookTitle,
+    ':publishingYear' => $publishingYear,
+    ':dateStarted' => $dateStarted,
+    ':dateFinished' => $dateFinished,
+    ':pages' => $pages,
+    ':hours' => $hours,
+    ':minutes' => $minutes,
+    ':nonFiction' => $nonFiction,
+    ':image' => $image,
+    ':rating' => $rating,
+    ':review' => $review,
+    ':owned' => $owned,
+    ':dnf' => $dnf,
+    ':fID' => $fID,
+    ':lID' => $lID
+  ]);
+
+  // Get Book ID
+  $bookID = $pdo->lastInsertId();
+
+  // Connect author to book
+  $stmt = $pdo->prepare("INSERT INTO books_authors (bID, aID) VALUES (:bookID, :authorID)");
+  $stmt->execute([':bookID' => $bookID, ':authorID' => $authorID]);
+
+  // Connect genres to book
+  $genres = $_POST['genres'] ?? [];
+  foreach ($genres as $genreTitle) {
+    $genreID = getOrCreateId($pdo, 'genre', 'genreTitle', $genreTitle);
+    $stmt = $pdo->prepare("INSERT INTO books_genres (bID, gID) VALUES (:bookID, :genreID)");
+    $stmt->execute([':bookID' => $bookID, ':genreID' => $genreID]);
+  }
+
+  // Connect tags to book
+  $tags = $_POST['tags'] ?? [];
+  foreach ($tags as $tagTitle) {
+    $tagID = getOrCreateId($pdo, 'tag', 'tagTitle', $tagTitle);
+    $stmt = $pdo->prepare("INSERT INTO books_tags (bID, tID) VALUES (:bookID, :tagID)");
+    $stmt->execute([':bookID' => $bookID, ':tagID' => $tagID]);
+  }
+
+  echo $bookTitle . " wurde erfolgreich gespeichert.";
+}
+
+
+$stmt = $pdo->query("SELECT lID, languageName FROM language ORDER BY languageName ASC");
+$languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 ?>
+
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container my-5" style="max-width: 600px;">
@@ -18,20 +115,25 @@ $pageTitle = "Add a new Book"
       <input type="text" id="author" name="author" class="form-control" placeholder="Enter author name">
     </div>
 
+    <div class="mb-3">
+      <label for="publishingYear" class="form-label">Publishing year</label>
+      <input type="number" id="publishingYear" name="publishingYear" class="form-control" placeholder="Publishing year">
+    </div>
+
     <div class="row mb-3">
       <div class="col">
-        <label for="startDate" class="form-label">Date started</label>
-        <input type="date" id="startDate" name="startDate" class="form-control">
+        <label for="dateStarted" class="form-label">Date started</label>
+        <input type="date" id="dateStarted" name="dateStarted" class="form-control">
       </div>
       <div class="col">
-        <label for="endDate" class="form-label">Date finished</label>
-        <input type="date" id="endDate" name="endDate" class="form-control">
+        <label for="dateFinished" class="form-label">Date finished</label>
+        <input type="date" id="dateFinished" name="dateFinished" class="form-control">
       </div>
     </div>
 
     <div class="mb-3">
-      <label for="pageNumber" class="form-label">Pages</label>
-      <input type="number" id="pageNumber" name="pageNumber" class="form-control" placeholder="Number of pages">
+      <label for="pages" class="form-label">Pages</label>
+      <input type="number" id="pages" name="pages" class="form-control" placeholder="Number of pages">
     </div>
 
     <div class="mb-3 d-flex gap-2">
@@ -48,11 +150,11 @@ $pageTitle = "Add a new Book"
     <fieldset class="mb-3">
       <legend class="col-form-label pt-0">Literature type</legend>
       <div class="form-check">
-        <input class="form-check-input" type="radio" id="fiction" name="fictionNonFiction" value="Fiction" checked>
+        <input class="form-check-input" type="radio" id="fiction" name="nonFiction" value="Fiction" checked>
         <label class="form-check-label" for="fiction">Fiction</label>
       </div>
       <div class="form-check">
-        <input class="form-check-input" type="radio" id="nonfiction" name="fictionNonFiction" value="Non-Fiction">
+        <input class="form-check-input" type="radio" id="nonfiction" name="nonFiction" value="Non-Fiction">
         <label class="form-check-label" for="nonfiction">Non-Fiction</label>
       </div>
     </fieldset>
@@ -68,8 +170,8 @@ $pageTitle = "Add a new Book"
     </div>
 
     <div class="mb-3">
-      <label for="language" class="form-label">Language</label>
-      <select id="language" name="language" class="form-select"></select>
+      <label for="language">Language</label>
+      <select name="lID" id="language" class="form-select"></select>
     </div>
 
     <div class="mb-3">
@@ -161,36 +263,43 @@ $pageTitle = "Add a new Book"
     .catch(err => console.error('Error loading formats:', err));
 
   //  Tags
-    fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle')
-      .then(response => response.json())
-      .then(data => {
-        console.log('Tags:', data); 
-        new Choices('#tags', {
-          removeItemButton: true,
-          placeholderValue: 'Select or add tags',
-          addItems: true,
-          choices: data.map(item => ({
-            value: item.tagTitle,
-            label: item.tagTitle
-          }))
-        });
-      })
-      .catch(err => console.error('Error loading tags:', err));
+  fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Tags:', data); 
+      new Choices('#tags', {
+        removeItemButton: true,
+        placeholderValue: 'Select or add tags',
+        addItems: true,
+        choices: data.map(item => ({
+          value: item.tagTitle,
+          label: item.tagTitle
+        }))
+      });
+    })
+    .catch(err => console.error('Error loading tags:', err));
 
   // Language
-      fetch('../Classes_Functions/loadselection.php?table=book&column=language')
-        .then(data => {
-          console.log('Language:', data); 
-          new Choices('#language', {
-            removeItemButton: true,
-            placeholderValue: 'Select or add language',
-            addItems: true,
-            choices: data.map(item => ({
-              value: item.language,
-              label: item.language
-          }))
-        });
-      })
-        .catch(err => console.error('Error loading languages:', err));
+  fetch('../Classes_Functions/loadselection.php?table=language&column=languageName')
+  .then(response => response.json())
+  .then(data => {
+    const languageChoices = data.length ? data : [{ lID: '', languageName: 'No languages found' }];
+    new Choices('#language', {
+      placeholderValue: 'Select or add language',
+      searchEnabled: true,
+      shouldSort: true,
+      addItems: true,
+      removeItemButton: false,
+      duplicateItemsAllowed: false,
+      choices: languageChoices.map(item => ({
+        value: item.lID,
+        label: item.languageName
+      }))
+    });
+  })
+  .catch(err => console.error('Error loading languages:', err));
+
+
+
 
 </script>

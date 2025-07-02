@@ -6,10 +6,10 @@ function dbConnect() {
     $password = "";
 
     try {
-    $PDO = new PDO("mysql:host=$servername;dbname=booknook", $username, $password);
+    $pdo = new PDO("mysql:host=$servername;dbname=booknook", $username, $password);
     // set the PDO error mode to exception
-    $PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    return $PDO;
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    return $pdo;
     } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
     return null;
@@ -17,14 +17,30 @@ function dbConnect() {
 
 }
 
-function loadSelection($PDO, $table, $column) {
-    $allowedTables = ['genre', 'tag', 'format'];
-    $allowedColumns = ['genreTitle', 'tagTitle', 'formatName'];
+function normalizeInput(array $data, array $fields): array {
+        foreach ($fields as $field) {
+            if (isset($data[$field]) && $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+        return $data;
+    }
+
+function loadSelection($pdo, $table, $column) {
+    $allowedTables = ['genre', 'tag', 'format', 'language'];
+    $allowedColumns = ['genreTitle', 'tagTitle', 'formatName', 'languageName'];
 
     if (in_array($table, $allowedTables) && in_array($column, $allowedColumns)) {
         header ('Content-type: application/json');
-        $sql = "SELECT $column FROM $table ORDER BY $column ASC";
-        $stmt = $PDO->prepare($sql);
+
+        if ($table === 'language') {
+            // Sprache braucht lID und languageName
+            $sql = "SELECT lID, languageName FROM language ORDER BY languageName ASC";
+        } else {
+            $sql = "SELECT $column FROM $table ORDER BY $column ASC";
+        }
+
+        $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($result);
@@ -32,5 +48,34 @@ function loadSelection($PDO, $table, $column) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid table- or column-name']);
     }
+}
+
+
+function getOrCreateId($pdo, $table, $column, $value) {
+    $idColumns = [
+        'author' => 'aID',
+        'genre' => 'gID',
+        'format' => 'fID',
+        'tag' => 'tID',
+    ];
+
+    if (!isset($idColumns[$table])) {
+        throw new Exception("Kein ID-Spaltenname für Tabelle '$table' definiert.");
+    }
+
+    $idColumn = $idColumns[$table];
+
+    $stmt = $pdo->prepare("SELECT $idColumn FROM $table WHERE $column = :value");
+    $stmt->execute([':value' => $value]);
+    $id = $stmt->fetchColumn();
+
+    if ($id) {
+        return $id;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO $table ($column) VALUES (:value)");
+    $stmt->execute([':value' => $value]);
+
+    return $pdo->lastInsertId();
 }
 
