@@ -50,32 +50,41 @@ function loadSelection($pdo, $table, $column) {
     }
 }
 
-
 function getOrCreateId($pdo, $table, $column, $value) {
-    $idColumns = [
-        'author' => 'aID',
-        'genre' => 'gID',
-        'format' => 'fID',
-        'tag' => 'tID',
+    $idColumnMap = [
+      'author' => 'aID',
+      'format' => 'fID',
+      'language' => 'lID',
+      'genre' => 'gID',
+      'tag' => 'tID',
     ];
-
-    if (!isset($idColumns[$table])) {
-        throw new Exception("Kein ID-Spaltenname für Tabelle '$table' definiert.");
-    }
-
-    $idColumn = $idColumns[$table];
+    $idColumn = $idColumnMap[$table] ?? 'id';
 
     $stmt = $pdo->prepare("SELECT $idColumn FROM $table WHERE $column = :value");
-    $stmt->execute([':value' => $value]);
+    if (!$stmt) {
+        $errorInfo = $pdo->errorInfo();
+        die("Fehler bei SELECT prepare in getOrCreateId: " . implode(", ", $errorInfo));
+    }
+    if (!$stmt->execute([':value' => $value])) {
+        $errorInfo = $stmt->errorInfo();
+        die("Fehler bei SELECT execute in getOrCreateId: " . implode(", ", $errorInfo));
+    }
     $id = $stmt->fetchColumn();
 
     if ($id) {
         return $id;
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO $table ($column) VALUES (:value)");
+        if (!$stmt) {
+            $errorInfo = $pdo->errorInfo();
+            die("Fehler bei INSERT prepare in getOrCreateId: " . implode(", ", $errorInfo));
+        }
+        if (!$stmt->execute([':value' => $value])) {
+            $errorInfo = $stmt->errorInfo();
+            die("Fehler bei INSERT execute in getOrCreateId: " . implode(", ", $errorInfo));
+        }
+        return $pdo->lastInsertId();
     }
-
-    $stmt = $pdo->prepare("INSERT INTO $table ($column) VALUES (:value)");
-    $stmt->execute([':value' => $value]);
-
-    return $pdo->lastInsertId();
 }
+
 

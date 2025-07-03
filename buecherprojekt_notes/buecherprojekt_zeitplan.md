@@ -37,6 +37,9 @@ started: 30/06/25
 - Datenübertragung aus Formular in addbook.php in Datenbank
 - Menüfunktion und Seitenladen durch JS 
 - CSS Farbanpassungen
+03.07.:
+- Fehler beim Seiten-laden in book.php durch JS korrigiert (js funktionen ausgelagert, js Inhalte in Formular auf index.php nachladen)
+- 
 
 
 # Coding Entscheidungen
