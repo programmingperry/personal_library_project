@@ -15,7 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $authorID = getOrCreateId($pdo, 'author', 'authorName', $authorName);
   $publishingYear = $_POST['publishingYear'] ?? null;
   $dateStarted = $_POST['dateStarted'] ?? null;
+  if ($dateStarted === '') {
+      $dateStarted = null;
+  }
   $dateFinished = $_POST['dateFinished'] ?? null;
+  if ($dateFinished === '') {
+      $dateFinished = null;
+  }
   $pages = $_POST['pages'] ?? null;
   $hours = $_POST['hours'] ?? 0;
   $minutes = $_POST['minutes'] ?? 0;
@@ -28,16 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $owned = isset($_POST['owned']) ? 1 : 0;
   $dnf = isset($_POST['dnf']) ? 1 : 0;
 
-  $lID_or_name = $_POST['lID'] ?? null;
   if ($lID_or_name === null || $lID_or_name === '') {
-      $lID = null;
-  } elseif (is_numeric($lID_or_name)) {
-      $lID = (int)$lID_or_name; 
-  } else {
-      
-  }
+    $lID = null;
+} elseif (is_numeric($lID_or_name)) {
+    $lID = (int)$lID_or_name; 
+} else {
+    $lID = getOrCreateId($pdo, 'language', 'languageName', $lID_or_name);
+}
 
 
+  var_dump($authorID, $fID, $lID);
 
   // 2. Add new book into book table
   $sql = "INSERT INTO book 
@@ -46,23 +52,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     (:bookTitle, :publishingYear, :dateStarted, :dateFinished, :pages, :hours, :minutes, :nonFiction, :image, :rating, :review, :owned, :dnf, :fID, :lID)";
   
   $stmt = $pdo->prepare($sql);
-  $stmt->execute([
-    ':bookTitle' => $bookTitle,
-    ':publishingYear' => $publishingYear,
-    ':dateStarted' => $dateStarted,
-    ':dateFinished' => $dateFinished,
-    ':pages' => $pages,
-    ':hours' => $hours,
-    ':minutes' => $minutes,
-    ':nonFiction' => $nonFiction,
-    ':image' => $image,
-    ':rating' => $rating,
-    ':review' => $review,
-    ':owned' => $owned,
-    ':dnf' => $dnf,
-    ':fID' => $fID,
-    ':lID' => $lID
-  ]);
+  if (!$stmt->execute([
+  ':bookTitle' => $bookTitle,
+  ':publishingYear' => $publishingYear,
+  ':dateStarted' => $dateStarted,
+  ':dateFinished' => $dateFinished,
+  ':pages' => $pages,
+  ':hours' => $hours,
+  ':minutes' => $minutes,
+  ':nonFiction' => $nonFiction,
+  ':image' => $image,
+  ':rating' => $rating,
+  ':review' => $review,
+  ':owned' => $owned,
+  ':dnf' => $dnf,
+  ':fID' => $fID,
+  ':lID' => $lID
+  ])) {
+    $errorInfo = $stmt->errorInfo();
+    die("Fehler beim Einfügen in die Datenbank: " . implode(", ", $errorInfo));
+  }
 
   // Get Book ID
   $bookID = $pdo->lastInsertId();
@@ -90,10 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   echo $bookTitle . " wurde erfolgreich gespeichert.";
 }
 
-
 $stmt = $pdo->query("SELECT lID, languageName FROM language ORDER BY languageName ASC");
 $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
 ?>
 
@@ -226,80 +233,3 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!-- Choices.js Styles & Script -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
-<script>
-  // Genres
-  fetch('../Classes_Functions/loadselection.php?table=genre&column=genreTitle')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Genres:', data); 
-      new Choices('#genres', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add genres',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.genreTitle,
-          label: item.genreTitle
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading genres:', err));
-
-  // Formats
-  fetch('../Classes_Functions/loadselection.php?table=format&column=formatName')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Format:', data); 
-      new Choices('#format', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add format',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.formatName,
-          label: item.formatName
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading formats:', err));
-
-  //  Tags
-  fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Tags:', data); 
-      new Choices('#tags', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add tags',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.tagTitle,
-          label: item.tagTitle
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading tags:', err));
-
-  // Language
-  fetch('../Classes_Functions/loadselection.php?table=language&column=languageName')
-  .then(response => response.json())
-  .then(data => {
-    const languageChoices = data.length ? data : [{ lID: '', languageName: 'No languages found' }];
-    new Choices('#language', {
-      placeholderValue: 'Select or add language',
-      searchEnabled: true,
-      shouldSort: true,
-      addItems: true,
-      removeItemButton: false,
-      duplicateItemsAllowed: false,
-      choices: languageChoices.map(item => ({
-        value: item.lID,
-        label: item.languageName
-      }))
-    });
-  })
-  .catch(err => console.error('Error loading languages:', err));
-
-
-
-
-</script>
