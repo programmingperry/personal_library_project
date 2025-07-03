@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   echo "<pre>POST Daten erhalten:\n";
   var_dump($_POST);
   echo "</pre>";
-  die("Stoppe nach POST-Daten Ausgabe");
   
   $nullableFields = ['publishingYear', 'dateStarted', 'dateFinished', 'pages', 'hours', 'minutes', 'rating', 'lID'];
   $_POST = normalizeInput($_POST, $nullableFields);
@@ -196,7 +195,9 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="mb-3">
       <label for="language">Language</label>
-      <select name="lID" id="language" class="form-select"></select>
+      <select name="lID" id="language" class="form-select">
+        <option value="">-- Select language --</option>
+      </select>
     </div>
 
     <div class="mb-3">
@@ -252,7 +253,4 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
-<script type="module">
-  import { initAddBookForm } from '../JS/addbook.js';
-  initAddBookForm();
-</script>
+

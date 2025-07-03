@@ -70,6 +70,6 @@ function initAddBookForm() {
     });
   })
   .catch(err => console.error('Error loading languages:', err));
-
-
 }
+
+window.initAddBookForm = initAddBookForm; // global 
