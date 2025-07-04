@@ -64,10 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     (:bookTitle, :publishingYear, :dateStarted, :dateFinished, :pages, :hours, :minutes, :nonFiction, :image, :rating, :review, :owned, :dnf, :fID, :lID)";
   
   $stmt = $pdo->prepare($sql);
-if (!$stmt) {
-    $errorInfo = $pdo->errorInfo();
-    die("Fehler beim vorbereiten des Statements: " . implode(", ", $errorInfo));
-}
+  if (!$stmt) {
+      $errorInfo = $pdo->errorInfo();
+      die("Fehler beim vorbereiten des Statements: " . implode(", ", $errorInfo));
+  }
 
   if (!$stmt->execute([
   ':bookTitle' => $bookTitle,
