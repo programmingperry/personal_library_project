@@ -39,7 +39,7 @@ started: 30/06/25
 - CSS Farbanpassungen
 03.07.:
 - Fehler beim Seiten-laden in book.php durch JS korrigiert (js funktionen ausgelagert, js Inhalte in Formular auf index.php nachladen)
-
+- neuen Fehler in addbook.php kreiert: speichern in DB funktioniert nicht mehr 
 
 
 # Coding Entscheidungen
