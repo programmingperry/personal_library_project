@@ -1,133 +1,24 @@
 <?php 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-echo "Fehleranzeige aktiviert<br>";
-trigger_error("Test-Fehler", E_USER_WARNING);
+session_start();
+if (isset($_SESSION['error'])) {
+    echo '<div class="error">' . $_SESSION['error'] . '</div>';
+    unset($_SESSION['error']); 
+}
 
 require_once "../Classes_Functions/DB.php";
 $pdo = dbConnect();
 $pageTitle = "Add a new Book";
-
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-  echo "<pre>POST Daten erhalten:\n";
-  var_dump($_POST);
-  echo "</pre>";
-  
-  $nullableFields = ['publishingYear', 'dateStarted', 'dateFinished', 'pages', 'hours', 'minutes', 'rating', 'lID'];
-  $_POST = normalizeInput($_POST, $nullableFields);
-  
-  // Get POST-Values
-  $bookTitle = $_POST['bookTitle'] ?? '';
-  $authorName = $_POST['author'] ?? '';
-  $authorID = getOrCreateId($pdo, 'author', 'authorName', $authorName);
-  $publishingYear = $_POST['publishingYear'] ?? null;
-  $dateStarted = $_POST['dateStarted'] ?? null;
-  if ($dateStarted === '') {
-      $dateStarted = null;
-  }
-  $dateFinished = $_POST['dateFinished'] ?? null;
-  if ($dateFinished === '') {
-    $dateFinished = null;
-  }
-  $pages = $_POST['pages'] ?? null;
-  $hours = $_POST['hours'] ?? 0;
-  $minutes = $_POST['minutes'] ?? 0;
-  $nonFiction = $_POST['nonFiction'] ?? 'Fiction';
-  $formatName = $_POST['format'] ?? '';
-  $fID = getOrCreateId($pdo, 'format', 'formatName', $formatName);
-  $image = $_POST['image'] ?? '';
-  $rating = $_POST['rating'] ?? null;
-  $review = $_POST['review'] ?? '';
-  $owned = isset($_POST['owned']) ? 1 : 0;
-  $dnf = isset($_POST['dnf']) ? 1 : 0;
-  $lID_or_name = $_POST['lID'] ?? null;
-  if ($lID_or_name === null || $lID_or_name === '') {
-    $lID = null;
-} elseif (is_numeric($lID_or_name)) {
-    $lID = (int)$lID_or_name; 
-} else {
-    $lID = getOrCreateId($pdo, 'language', 'languageName', $lID_or_name);
-}
-
-
-  var_dump($authorID, $fID, $lID);
-  var_dump($lID_or_name, $lID);
-
-  // 2. Add new book into book table
-  $sql = "INSERT INTO book 
-    (bookTitle, publishingYear, dateStarted, dateFinished, pages, hours, minutes, nonFiction, image, rating, review, owned, dnf, fID, lID)
-    VALUES 
-    (:bookTitle, :publishingYear, :dateStarted, :dateFinished, :pages, :hours, :minutes, :nonFiction, :image, :rating, :review, :owned, :dnf, :fID, :lID)";
-  
-  $stmt = $pdo->prepare($sql);
-  if (!$stmt) {
-      $errorInfo = $pdo->errorInfo();
-      die("Fehler beim vorbereiten des Statements: " . implode(", ", $errorInfo));
-  }
-
-  if (!$stmt->execute([
-  ':bookTitle' => $bookTitle,
-  ':publishingYear' => $publishingYear,
-  ':dateStarted' => $dateStarted,
-  ':dateFinished' => $dateFinished,
-  ':pages' => $pages,
-  ':hours' => $hours,
-  ':minutes' => $minutes,
-  ':nonFiction' => $nonFiction,
-  ':image' => $image,
-  ':rating' => $rating,
-  ':review' => $review,
-  ':owned' => $owned,
-  ':dnf' => $dnf,
-  ':fID' => $fID,
-  ':lID' => $lID
-  ])) {
-    $errorInfo = $stmt->errorInfo();
-    die("Fehler beim Einfügen in die Datenbank: " . implode(", ", $errorInfo));
-  }
-
-  // Get Book ID
-  $bookID = $pdo->lastInsertId();
-
-  // Connect author to book
-  $stmt = $pdo->prepare("INSERT INTO books_authors (bID, aID) VALUES (:bookID, :authorID)");
-  $stmt->execute([':bookID' => $bookID, ':authorID' => $authorID]);
-
-  // Connect genres to book
-  $genres = $_POST['genres'] ?? [];
-  foreach ($genres as $genreTitle) {
-    $genreID = getOrCreateId($pdo, 'genre', 'genreTitle', $genreTitle);
-    $stmt = $pdo->prepare("INSERT INTO books_genres (bID, gID) VALUES (:bookID, :genreID)");
-    $stmt->execute([':bookID' => $bookID, ':genreID' => $genreID]);
-  }
-
-  // Connect tags to book
-  $tags = $_POST['tags'] ?? [];
-  foreach ($tags as $tagTitle) {
-    $tagID = getOrCreateId($pdo, 'tag', 'tagTitle', $tagTitle);
-    $stmt = $pdo->prepare("INSERT INTO books_tags (bID, tID) VALUES (:bookID, :tagID)");
-    $stmt->execute([':bookID' => $bookID, ':tagID' => $tagID]);
-  }
-
-  echo $bookTitle . " wurde erfolgreich gespeichert.";
-}
-
-$stmt = $pdo->query("SELECT lID, languageName FROM language ORDER BY languageName ASC");
-$languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<?php if (isset($_GET['success'])): ?>
+  <div class="success">Book was added successfully.</div>
+<?php endif; ?>
 
 <div class="container my-5" style="max-width: 600px;">
+  <div id="formMessage"></div>
   <h1 class="mb-4 text-center">Add a new book</h1>
 
-  <form method="POST">
+  <form id="addBookForm">
 
     <div class="mb-3">
       <label for="bookTitle" class="form-label">Book title</label>
@@ -245,12 +136,3 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <button type="submit" class="btn btn-primary w-100">Add Book</button>
   </form>
 </div>
-
-<!-- Bootstrap JS (optional, für interaktive Komponenten) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Choices.js Styles & Script -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
-

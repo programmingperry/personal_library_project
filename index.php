@@ -12,51 +12,43 @@ $conn = dbConnect();
   </div>
   <div class="container mt-4">
     <div id="content">
+      </div>
     </div>
-  </div>
-</body>
 
 <script src="./JS/formHandlers.js"></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault();
-        let text = e.target.textContent.trim().toLowerCase();
 
+        const text = e.target.textContent.trim().toLowerCase();
         let url = null;
-        if (text === 'add') {
-          url = './inc/addbook.php'; 
-        } else if (text === 'books') {
-          url = './inc/bookoverview.php'; 
-        } 
+
+        if (text === 'add') url = './inc/addbook.php';
+        else if (text === 'books') url = './inc/bookoverview.php';
 
         if (url) {
           fetch(url)
-            .then(response => {
-              if (!response.ok) throw new Error("Fehler beim Laden");
-              return response.text();
-            })
+            .then(res => res.text())
             .then(html => {
               document.getElementById('content').innerHTML = html;
+
               initFormHandlers();
 
-              if (url.includes('addbook.php')) {
-                const script = document.createElement('script');
-                script.src = './JS/addbook.js'; 
-                script.onload = () => {
-                  initAddBookForm();
-                };
-                document.body.appendChild(script);
-              }
-            })
-            .catch(err => {
-              document.getElementById('content').innerHTML = `<p class="text-danger">Fehler: ${err.message}</p>`;
+              const script = document.createElement('script');
+              script.src = './JS/addbook.js';
+              script.onload = () => {
+                if (typeof initAddBookForm === 'function') initAddBookForm();
+                if (typeof loadChoices === 'function') loadChoices();
+              };
+              document.body.appendChild(script);
             });
         }
       });
     });
-
-    initFormHandlers(); 
   });
 </script>
+
+</body>

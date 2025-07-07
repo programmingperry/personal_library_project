@@ -1,7 +1,8 @@
 
 <?php
 /* AJAX-Endpoint */
-require_once 'DB.php'; 
+require_once 'DB.php';
+require_once 'addbookFunctions.php'; 
 
 $table = $_GET['table'] ?? null;
 $column = $_GET['column'] ?? null;

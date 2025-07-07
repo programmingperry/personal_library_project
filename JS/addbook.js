@@ -1,60 +1,86 @@
 function initAddBookForm() {
+  console.log('initAddBookForm called');
+  const form = document.querySelector('#addBookForm');
+  if (!form) {
+    console.log('Form not found!');
+    return;
+  }
+  console.log('Form found, adding listener');
 
+  const form = document.querySelector('#addBookForm');
+  const messageContainer = document.querySelector('#formMessage'); 
+
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    console.log('Form submit intercepted');
+  e.preventDefault();
+    e.preventDefault();
+    messageContainer.textContent = ''; 
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('./Classes_Functions/processAddbook.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        messageContainer.textContent = data.message;
+        messageContainer.style.color = 'green';
+        form.reset();
+      } else {
+        messageContainer.textContent = Array.isArray(data.errors) ? data.errors.join(', ') : data.message;
+        messageContainer.style.color = 'red';
+      }
+    } catch (err) {
+      messageContainer.textContent = 'Server-Fehler: ' + err.message;
+      messageContainer.style.color = 'red';
+    }
+  });
+}
+
+  loadChoices();
+
+
+async function loadChoices() {
+  try {
     // Genres
-  fetch('./Classes_Functions/loadselection.php?table=genre&column=genreTitle')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Genres:', data); 
-      new Choices('#genres', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add genres',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.genreTitle,
-          label: item.genreTitle
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading genres:', err));
+    let response = await fetch('../Classes_Functions/loadselection.php?table=genre&column=genreTitle');
+    let data = await response.json();
+    new Choices('#genres', {
+      removeItemButton: true,
+      placeholderValue: 'Select or add genres',
+      addItems: true,
+      choices: data.map(item => ({ value: item.genreTitle, label: item.genreTitle }))
+    });
 
-  // Formats
-  fetch('./Classes_Functions/loadselection.php?table=format&column=formatName')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Format:', data); 
-      new Choices('#format', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add format',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.formatName,
-          label: item.formatName
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading formats:', err));
+    // Formate
+    response = await fetch('../Classes_Functions/loadselection.php?table=format&column=formatName');
+    data = await response.json();
+    new Choices('#format', {
+      removeItemButton: true,
+      placeholderValue: 'Select or add format',
+      addItems: true,
+      choices: data.map(item => ({ value: item.formatName, label: item.formatName }))
+    });
 
-  //  Tags
-  fetch('./Classes_Functions/loadselection.php?table=tag&column=tagTitle')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Tags:', data); 
-      new Choices('#tags', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add tags',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.tagTitle,
-          label: item.tagTitle
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading tags:', err));
+    // Tags
+    response = await fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle');
+    data = await response.json();
+    new Choices('#tags', {
+      removeItemButton: true,
+      placeholderValue: 'Select or add tags',
+      addItems: true,
+      choices: data.map(item => ({ value: item.tagTitle, label: item.tagTitle }))
+    });
 
-  // Language
-  fetch('./Classes_Functions/loadselection.php?table=language&column=languageName')
-  .then(response => response.json())
-  .then(data => {
+    // Language
+    response = await fetch('../Classes_Functions/loadselection.php?table=language&column=languageName');
+    data = await response.json();
     const languageChoices = data.length ? data : [{ lID: '', languageName: 'No languages found' }];
     new Choices('#language', {
       placeholderValue: 'Select or add language',
@@ -63,13 +89,11 @@ function initAddBookForm() {
       addItems: true,
       removeItemButton: false,
       duplicateItemsAllowed: false,
-      choices: languageChoices.map(item => ({
-        value: item.lID,
-        label: item.languageName
-      }))
+      choices: languageChoices.map(item => ({ value: item.lID, label: item.languageName }))
     });
-  })
-  .catch(err => console.error('Error loading languages:', err));
+  } catch (err) {
+    console.error('Selection could not be loaded:', err);
+  }
 }
 
-window.initAddBookForm = initAddBookForm; // global 
+window.addEventListener('DOMContentLoaded', initAddBookForm);

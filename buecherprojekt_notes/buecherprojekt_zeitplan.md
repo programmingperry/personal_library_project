@@ -40,7 +40,9 @@ started: 30/06/25
 03.07.:
 - Fehler beim Seiten-laden in book.php durch JS korrigiert (js funktionen ausgelagert, js Inhalte in Formular auf index.php nachladen)
 - neuen Fehler in addbook.php kreiert: speichern in DB funktioniert nicht mehr 
-
+07.07.:
+- erneute Fehlersuche, Umstellungen im Code, Auslagerungen von Funktionen und neue Struktur im Programmcode
+- Recherche und Verstehen von Zusammenhängen zwischen JS, Ajax, PHP 
 
 # Coding Entscheidungen
 ## Zusammengefasst
