@@ -1,16 +1,12 @@
 <?php 
-require_once "../Classes_Functions/DB.php";
-$pdo = dbConnect();
-$pageTitle = "Add a new Book";
-?>
+  $pagetitle = 'Add a book';
+  $page = 'addbook';
+  require_once "../inc/head.php";
+  require_once "../Classes_Functions/selection.php";
+  ?>
 
-<?php if (isset($_GET['success'])): ?>
-  <div class="success">Book was added successfully.</div>
-<?php endif; ?>
-
+<body class="dark-academia">
 <div class="container my-5" style="max-width: 600px;">
-  
-  <h1 class="mb-4 text-center">Add a new book</h1>
   
   <div id="messageContainer" class="mb-3"></div>
   
@@ -72,7 +68,12 @@ $pageTitle = "Add a new Book";
 
     <div class="mb-3">
       <label for="genres" class="form-label">Genres</label>
-      <select id="genres" name="genres[]" multiple class="form-select"></select>
+      <select id="genres" name="genres[]" multiple class="form-select">
+        <?php echo "HALLO?"?>
+        <?php foreach ($genreArr AS $genre) {
+          $genre->writeSelection();
+        } ?>
+      </select>
     </div>
 
     <div class="mb-3">
@@ -132,3 +133,6 @@ $pageTitle = "Add a new Book";
     <button type="submit" class="btn btn-primary w-100">Add Book</button>
   </form>
 </div>
+</body>
+
+<script></script>

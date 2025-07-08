@@ -17,7 +17,6 @@ function loadSelection($pdo, $table, $column) {
         header ('Content-type: application/json');
 
         if ($table === 'language') {
-            // Sprache braucht lID und languageName
             $sql = "SELECT lID, languageName FROM language ORDER BY languageName ASC";
         } else {
             $sql = "SELECT $column FROM $table ORDER BY $column ASC";

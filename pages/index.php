@@ -1,21 +1,17 @@
 <?php 
-require_once "./inc/head.php";
-require_once "./inc/nav.php";
-require_once "./Classes_Functions/DB.php";
-
-$conn = dbConnect(); 
+  $pagetitle = 'Welcome to the Book Nook Library';
+  $page = 'welcome';
+  require_once "../inc/head.php";
 ?>
 
 <body class="dark-academia">
-  <div>
-    <img class="bookshelf" src="./assets/bookshelf2.png">
-  </div>
+  
   <div class="container mt-4">
     <div id="content">
       </div>
     </div>
 
-<script>
+<!-- <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', e => {
@@ -53,4 +49,4 @@ $conn = dbConnect();
   });
 </script>
 
-</body>
+</body> -->
