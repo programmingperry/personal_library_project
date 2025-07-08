@@ -1,3 +1,4 @@
+/* redundant -> happens in addbook.js
 function initFormHandlers() {
   console.log('[formHandlers] init');
 

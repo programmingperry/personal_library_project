@@ -1,10 +1,4 @@
 <?php 
-session_start();
-if (isset($_SESSION['error'])) {
-    echo '<div class="error">' . $_SESSION['error'] . '</div>';
-    unset($_SESSION['error']); 
-}
-
 require_once "../Classes_Functions/DB.php";
 $pdo = dbConnect();
 $pageTitle = "Add a new Book";
@@ -15,10 +9,12 @@ $pageTitle = "Add a new Book";
 <?php endif; ?>
 
 <div class="container my-5" style="max-width: 600px;">
-  <div id="formMessage"></div>
+  
   <h1 class="mb-4 text-center">Add a new book</h1>
-
-  <form id="addBookForm">
+  
+  <div id="messageContainer" class="mb-3"></div>
+  
+  <form id="addBookForm" method="POST">
 
     <div class="mb-3">
       <label for="bookTitle" class="form-label">Book title</label>

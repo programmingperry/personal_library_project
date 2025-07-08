@@ -15,8 +15,6 @@ $conn = dbConnect();
       </div>
     </div>
 
-<script src="./JS/formHandlers.js"></script>
-
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -35,16 +33,20 @@ $conn = dbConnect();
             .then(html => {
               document.getElementById('content').innerHTML = html;
 
-              initFormHandlers();
-
-              const script = document.createElement('script');
-              script.src = './JS/addbook.js';
-              script.onload = () => {
+              if (!document.querySelector('script[src="./JS/addbook.js"]')) {
+                const script = document.createElement('script');
+                script.src = './JS/addbook.js';
+                script.onload = () => {
+                  if (typeof initAddBookForm === 'function') initAddBookForm();
+                  if (typeof loadChoices === 'function') loadChoices();
+                };
+                document.body.appendChild(script);
+              } else {
+                // Script schon da – Funktionen manuell aufrufen
                 if (typeof initAddBookForm === 'function') initAddBookForm();
                 if (typeof loadChoices === 'function') loadChoices();
-              };
-              document.body.appendChild(script);
-            });
+              }
+          });
         }
       });
     });

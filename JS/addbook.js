@@ -1,4 +1,8 @@
+console.log('addbook.js loaded');
 function initAddBookForm() {
+  if (window.__formInitialized) return;
+  window.__formInitialized = true;
+
   console.log('initAddBookForm called');
   const form = document.querySelector('#addBookForm');
   if (!form) {
@@ -7,14 +11,10 @@ function initAddBookForm() {
   }
   console.log('Form found, adding listener');
 
-  const form = document.querySelector('#addBookForm');
-  const messageContainer = document.querySelector('#formMessage'); 
-
-  if (!form) return;
-
   form.addEventListener('submit', async (e) => {
+    const messageContainer = document.querySelector('#messageContainer');
+
     console.log('Form submit intercepted');
-  e.preventDefault();
     e.preventDefault();
     messageContainer.textContent = ''; 
 
@@ -42,9 +42,6 @@ function initAddBookForm() {
     }
   });
 }
-
-  loadChoices();
-
 
 async function loadChoices() {
   try {
@@ -95,5 +92,3 @@ async function loadChoices() {
     console.error('Selection could not be loaded:', err);
   }
 }
-
-window.addEventListener('DOMContentLoaded', initAddBookForm);
