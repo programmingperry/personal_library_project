@@ -1,21 +1,24 @@
 <?php 
-require_once "../Classes_Functions/DB.php";
-$pdo = dbConnect();
-$pageTitle = "Add a new Book";
+  $pagetitle = 'Add a new book';
+  $page = 'addbook';
+  require_once "../inc/head.php";
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  
-
-  $nullableFields = ['publishingYear', 'dateStarted', 'dateFinished', 'pages', 'hours', 'minutes', 'rating', 'lID'];
-  $_POST = normalizeInput($_POST, $nullableFields);
 
   // Get POST-Values
   $bookTitle = $_POST['bookTitle'] ?? '';
   $authorName = $_POST['author'] ?? '';
-  $authorID = getOrCreateId($pdo, 'author', 'authorName', $authorName);
+  $aID = getOrCreateId($pdo, 'author', 'authorName', $authorName);
   $publishingYear = $_POST['publishingYear'] ?? null;
   $dateStarted = $_POST['dateStarted'] ?? null;
+  if ($dateStarted === '') {
+    $dateStarted = null;
+  }
   $dateFinished = $_POST['dateFinished'] ?? null;
+  if ($dateFinished === '') {
+    $dateFinished = null;
+  }
   $pages = $_POST['pages'] ?? null;
   $hours = $_POST['hours'] ?? 0;
   $minutes = $_POST['minutes'] ?? 0;
@@ -27,17 +30,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $review = $_POST['review'] ?? '';
   $owned = isset($_POST['owned']) ? 1 : 0;
   $dnf = isset($_POST['dnf']) ? 1 : 0;
-
   $lID_or_name = $_POST['lID'] ?? null;
   if ($lID_or_name === null || $lID_or_name === '') {
-      $lID = null;
+    $lID = null;
   } elseif (is_numeric($lID_or_name)) {
-      $lID = (int)$lID_or_name; 
+    $lID = (int)$lID_or_name; 
   } else {
-      
+    $lID = getOrCreateId($pdo, 'language', 'languageName', $lID_or_name);
   }
+  
+  $nullableFields = ['publishingYear', 'dateStarted', 'dateFinished', 'pages', 'hours', 'minutes', 'rating', 'lID'];
+  $_POST = normalizeInput($_POST, $nullableFields);
+  
+  $requiredFields = ['bookTitle', 'author', 'format'];
+  $errors = validateRequiredFields($_POST, $requiredFields);
 
-
+  if ($errors) {
+      foreach ($errors as $error) {
+          echo "<div class='alert alert-danger'>$error</div>";
+      }
+      exit;
+  }
 
   // 2. Add new book into book table
   $sql = "INSERT INTO book 
@@ -46,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     (:bookTitle, :publishingYear, :dateStarted, :dateFinished, :pages, :hours, :minutes, :nonFiction, :image, :rating, :review, :owned, :dnf, :fID, :lID)";
   
   $stmt = $pdo->prepare($sql);
-  $stmt->execute([
+  if (!$stmt->execute([
     ':bookTitle' => $bookTitle,
     ':publishingYear' => $publishingYear,
     ':dateStarted' => $dateStarted,
@@ -62,15 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ':dnf' => $dnf,
     ':fID' => $fID,
     ':lID' => $lID
-  ]);
-
+  ])) {
+  $errorInfo = $stmt->errorInfo();
+  die("Fehler beim Einfügen in die Datenbank: " . implode(", ", $errorInfo));
+  }
   // Get Book ID
   $bookID = $pdo->lastInsertId();
-
+  
   // Connect author to book
-  $stmt = $pdo->prepare("INSERT INTO books_authors (bID, aID) VALUES (:bookID, :authorID)");
-  $stmt->execute([':bookID' => $bookID, ':authorID' => $authorID]);
-
+  $stmt = $pdo->prepare("INSERT INTO books_authors (bID, aID) VALUES (:bookID, :aID)");
+  $stmt->execute([':bookID' => $bookID, ':aID' => $aID]);
+  
   // Connect genres to book
   $genres = $_POST['genres'] ?? [];
   foreach ($genres as $genreTitle) {
@@ -78,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("INSERT INTO books_genres (bID, gID) VALUES (:bookID, :genreID)");
     $stmt->execute([':bookID' => $bookID, ':genreID' => $genreID]);
   }
-
+  
   // Connect tags to book
   $tags = $_POST['tags'] ?? [];
   foreach ($tags as $tagTitle) {
@@ -86,22 +101,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("INSERT INTO books_tags (bID, tID) VALUES (:bookID, :tagID)");
     $stmt->execute([':bookID' => $bookID, ':tagID' => $tagID]);
   }
-
+  
   echo $bookTitle . " wurde erfolgreich gespeichert.";
+  
+  
+  $stmt = $pdo->query("SELECT lID, languageName FROM language ORDER BY languageName ASC");
+  $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-
-$stmt = $pdo->query("SELECT lID, languageName FROM language ORDER BY languageName ASC");
-$languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+  
 
 ?>
 
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+<body class="dark-academia">
 <div class="container my-5" style="max-width: 600px;">
-  <h1 class="mb-4 text-center">Add a new book</h1>
 
   <form method="POST">
 
@@ -219,6 +233,7 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <button type="submit" class="btn btn-primary w-100">Add Book</button>
   </form>
 </div>
+</body>
 
 <!-- Bootstrap JS (optional, für interaktive Komponenten) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -237,6 +252,12 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         removeItemButton: true,
         placeholderValue: 'Select or add genres',
         addItems: true,
+        delimiter: ',',
+        paste: true,
+        editItems: true,
+        duplicateItemsAllowed: false,
+        shouldSort: true,
+        addItemFilter: value => value.trim() !== '',
         choices: data.map(item => ({
           value: item.genreTitle,
           label: item.genreTitle
@@ -254,6 +275,12 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         removeItemButton: true,
         placeholderValue: 'Select or add format',
         addItems: true,
+        delimiter: ',',
+        paste: true,
+        editItems: true,
+        duplicateItemsAllowed: false,
+        shouldSort: true,
+        addItemFilter: value => value.trim() !== '',
         choices: data.map(item => ({
           value: item.formatName,
           label: item.formatName
@@ -262,22 +289,32 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     })
     .catch(err => console.error('Error loading formats:', err));
 
-  //  Tags
-  fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle')
-    .then(response => response.json())
-    .then(data => {
-      console.log('Tags:', data); 
-      new Choices('#tags', {
-        removeItemButton: true,
-        placeholderValue: 'Select or add tags',
-        addItems: true,
-        choices: data.map(item => ({
-          value: item.tagTitle,
-          label: item.tagTitle
-        }))
-      });
-    })
-    .catch(err => console.error('Error loading tags:', err));
+  // Tags
+fetch('../Classes_Functions/loadselection.php?table=tag&column=tagTitle')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Tags:', data);
+    const tagSelect = document.getElementById('tags');
+
+    const tagChoices = data.map(item => ({
+      value: item.tagTitle,
+      label: item.tagTitle
+    }));
+
+    new Choices(tagSelect, {
+      removeItemButton: true,
+      placeholderValue: 'Select or add tags',
+      shouldSort: false,
+      duplicateItemsAllowed: false,
+      addItems: true,
+      paste: true,
+      editItems: true,
+      delimiter: ',',
+      addItemFilter: value => value.trim() !== '',
+      choices: tagChoices
+    });
+  })
+  .catch(err => console.error('Error loading tags:', err));
 
   // Language
   fetch('../Classes_Functions/loadselection.php?table=language&column=languageName')
@@ -289,8 +326,12 @@ $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
       searchEnabled: true,
       shouldSort: true,
       addItems: true,
+      delimiter: ',',
+      paste: true,
+      editItems: true,
       removeItemButton: false,
       duplicateItemsAllowed: false,
+      addItemFilter: value => value.trim() !== '',
       choices: languageChoices.map(item => ({
         value: item.lID,
         label: item.languageName

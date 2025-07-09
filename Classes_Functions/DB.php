@@ -17,6 +17,14 @@ function dbConnect() {
 
 }
 
+// Show books
+function getBooks($pdo) {
+    $sql = "SELECT book.bookTitle, author.authorName FROM book LEFT JOIN books_authors ON book.bID = books_authors.bID LEFT JOIN author ON books_authors.aID = author.aID"; 
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+}
+
+// Add book
 function normalizeInput(array $data, array $fields): array {
         foreach ($fields as $field) {
             if (isset($data[$field]) && $data[$field] === '') {
@@ -57,6 +65,7 @@ function getOrCreateId($pdo, $table, $column, $value) {
         'genre' => 'gID',
         'format' => 'fID',
         'tag' => 'tID',
+        'language' => 'lID',
     ];
 
     if (!isset($idColumns[$table])) {
@@ -79,3 +88,12 @@ function getOrCreateId($pdo, $table, $column, $value) {
     return $pdo->lastInsertId();
 }
 
+function validateRequiredFields($data, $requiredFields) {
+    $errors = [];
+    foreach ($requiredFields as $field) {
+        if (empty($data[$field])) {
+            $errors[] = "Das Feld '$field' ist erforderlich.";
+        }
+    }
+    return $errors;
+}
