@@ -260,3 +260,12 @@ font-family: "Overlock", sans-serif;
 #pageTitle {
   margin-top: 5%;
 }
+
+#bookCard {
+  margin: 1rem;
+  background: var(--bs-border-color);
+}
+
+.card-title {
+  margin-top: 1rem;
+}

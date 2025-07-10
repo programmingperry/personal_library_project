@@ -19,9 +19,19 @@ function dbConnect() {
 
 // Show books
 function getBooks($pdo) {
-    $sql = "SELECT book.bookTitle, author.authorName FROM book LEFT JOIN books_authors ON book.bID = books_authors.bID LEFT JOIN author ON books_authors.aID = author.aID"; 
+    $sql = "SELECT book.image, book.bookTitle, author.authorName FROM book LEFT JOIN books_authors ON book.bID = books_authors.bID LEFT JOIN author ON books_authors.aID = author.aID"; 
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return json_encode($result);
+}
+
+function currentlyReading($pdo) {
+    $sql = "SELECT book.image, book.bookTitle, author.authorName, book.dateStarted FROM book LEFT JOIN books_authors ON book.bID = books_authors.bID LEFT JOIN author ON books_authors.aID = author.aID WHERE book.dateFinished IS NULL"; 
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return json_encode($result);
 }
 
 // Add book

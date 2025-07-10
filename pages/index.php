@@ -5,48 +5,40 @@
 ?>
 
 <body class="dark-academia">
-  
-  <div class="container mt-4">
-    <div id="content">
-      </div>
+<?php 
+    $pagetitle = 'Library';
+    $page = 'bookoverview';
+    require_once "../inc/head.php";
+?>
+    <h2>Currently Reading</h2>
+    <div class="col text-center">
+        <div id="bookList" class="row"></div>
     </div>
+</body>
 
-<!-- <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
+<?php 
+    require_once '../inc/footer.php';
+?>
 
-        const text = e.target.textContent.trim().toLowerCase();
-        let url = null;
+<script>
+    $(document).ready(function() {
+        console.log("ready");
 
-        if (text === 'add') url = './inc/addbook.php';
-        else if (text === 'books') url = './inc/bookoverview.php';
+        $.get("../Classes_Functions/currentreads.php", function(books) {
+            $.each(books, function(index, book) {
+                var div = $("<div>").addClass("col-md-2");
+                var card = $("<div>").addClass("card").addClass("col-md-4").attr("style", "width: 18rem").attr("id", "bookCard");
+                var cardBody = $("<div>").addClass("card-body");
+                var image = $("<img>").attr("src", book.image).addClass("card-img-top");
+                var title = $("<h5>").addClass("card-title").text(book.bookTitle);
+                var author = $("<p>").addClass("card-text").text(book.authorName); 
+                cardBody.append(image).append(title).append(author);
+                card.append(cardBody);
+                div.append(card);
+                $("#bookList").append(card);
+            });
+        });
+        
 
-        if (url) {
-          fetch(url)
-            .then(res => res.text())
-            .then(html => {
-              document.getElementById('content').innerHTML = html;
-
-              if (!document.querySelector('script[src="./JS/addbook.js"]')) {
-                const script = document.createElement('script');
-                script.src = './JS/addbook.js';
-                script.onload = () => {
-                  if (typeof initAddBookForm === 'function') initAddBookForm();
-                  if (typeof loadChoices === 'function') loadChoices();
-                };
-                document.body.appendChild(script);
-              } else {
-                // Script schon da – Funktionen manuell aufrufen
-                if (typeof initAddBookForm === 'function') initAddBookForm();
-                if (typeof loadChoices === 'function') loadChoices();
-              }
-          });
-        }
-      });
-    });
-  });
+    }); 
 </script>
-
-</body> -->
