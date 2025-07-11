@@ -17,8 +17,6 @@
 
 <script>
     $(document).ready(function() {
-        console.log("ready");
-
         $.get("../Classes_Functions/getbook.php", function(books) {
             $.each(books, function(index, book) {
                 const div = $("<div>").addClass("col-md-2");
@@ -33,7 +31,5 @@
                 $("#bookList").append(card);
             });
         });
-        
-
     }); 
 </script>
